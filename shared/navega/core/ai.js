@@ -13,15 +13,27 @@ import { host } from './host.js';
 
 function trimSlash(u) { return String(u || '').replace(/\/+$/, ''); }
 
+function cleanErr(e) {
+  return String((e && e.message) || e).replace(/^Error invoking remote method '[^']+': /, '').replace(/^(Type)?Error: /, '');
+}
+
+async function hostFetch(s, url, opts) {
+  try {
+    return await host.fetch(url, opts);
+  } catch (e) {
+    throw new Error(connectionHelp(s, cleanErr(e)));
+  }
+}
+
 export async function listModels(s) {
   if (s.provider === 'ollama') {
-    const r = await host.fetch(trimSlash(s.ollamaUrl) + '/api/tags', { method: 'GET' });
+    const r = await hostFetch(s, trimSlash(s.ollamaUrl) + '/api/tags', { method: 'GET' });
     if (r.status !== 200) throw new Error('Ollama respondió ' + r.status);
     return (JSON.parse(r.text).models || []).map((m) => m.name);
   }
   if (s.provider === 'openai') {
     const headers = s.openaiKey ? { Authorization: 'Bearer ' + s.openaiKey } : {};
-    const r = await host.fetch(trimSlash(s.openaiUrl) + '/models', { method: 'GET', headers });
+    const r = await hostFetch(s, trimSlash(s.openaiUrl) + '/models', { method: 'GET', headers });
     if (r.status !== 200) throw new Error('El servidor respondió ' + r.status);
     return (JSON.parse(r.text).data || []).map((m) => m.id);
   }
@@ -142,7 +154,7 @@ export function chat({ settings: s, messages, onToken, onStatus, json = false })
       res = await streamCtl.done;
     } catch (e) {
       if (aborted) return full;
-      throw new Error(connectionHelp(s, e.message));
+      throw new Error(connectionHelp(s, cleanErr(e)));
     }
     if (buf) handleLine(buf);
     if (apiError) throw new Error(apiError);

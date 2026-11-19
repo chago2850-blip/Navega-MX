@@ -304,6 +304,7 @@ function aiMessage(kind) {
       $$('button', r).forEach((b) => (b.onclick = () => { setMode('buscar'); input.value = b.textContent; send(); }));
     },
     error(msg) {
+      msg = String(msg).replace(/^Error invoking remote method '[^']+': /, '');
       md.classList.remove('cursor');
       md.insertAdjacentHTML('beforeend', '<div class="err">' + esc(msg) + '</div>');
       api.status('');
