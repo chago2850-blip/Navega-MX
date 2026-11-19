@@ -539,8 +539,7 @@ if (process.env.NAVEGA_SMOKE) {
         out.agente = String(snap).split('\\n').slice(0, 5);
         const wv = document.querySelector('webview.vis');
         out.puenteInicio = await wv.executeJavaScript('typeof window.navegaNewtab');
-        await wv.executeJavaScript("window.__probar = function (m, t) { document.querySelector('#seg button[data-m=' + m + ']').click(); document.getElementById('q').value = t; document.querySelector('.go').click(); }");
-        const definir = "window.__probar = function (m, t) { document.querySelector('#seg button[data-m=' + m + ']').click(); document.getElementById('q').value = t; document.querySelector('.go').click(); }";
+        const definir = "window.__probar = function (m, t) { document.querySelector('#seg button[data-m=' + m + ']').click(); document.getElementById('q').value = t; document.querySelector('.go').click(); }; 0";
         const probar = async (modo, texto) => {
           await wv.executeJavaScript(definir);
           await wv.executeJavaScript('window.__probar(' + JSON.stringify(modo) + ',' + JSON.stringify(texto) + ')');
