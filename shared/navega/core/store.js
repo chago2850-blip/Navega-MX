@@ -17,7 +17,7 @@ export const DEFAULTS = {
   language: 'español',
   searchEngine: 'duckduckgo', // duckduckgo | searxng | google | bing | brave | startpage
   searxUrl: '',
-  answerSources: 5,
+  answerSources: 4,
   adblock: true,
   memoryMode: 'local', // off | local | local+historial
   agentConfirm: true,

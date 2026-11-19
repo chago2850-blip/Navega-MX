@@ -11,7 +11,7 @@
  */
 import { host } from '../core/host.js';
 import { store, BUILTIN_SHORTCUTS, DEFAULTS } from '../core/store.js';
-import { chat, listModels, systemBase, WEBLLM_MODELS } from '../core/ai.js';
+import { chat, listModels, systemBase, warmup, WEBLLM_MODELS } from '../core/ai.js';
 import { answer, splitRelated } from '../core/answer.js';
 import { runAgent } from '../core/agent.js';
 import { renderMarkdown, esc } from '../core/markdown.js';
@@ -418,7 +418,7 @@ async function gatherContext(opts) {
     if (includePage || opts.needPage) {
       const t = await host.getActiveTab();
       if (t && t.id && !/^navega:|appassets/.test(t.url || '')) {
-        page = await host.getPageContent(t.id, 14000);
+        page = await host.getPageContent(t.id, 8000);
         if (page && !page.error) {
           parts.push('PÁGINA ACTUAL: ' + page.title + '\nURL: ' + page.url +
             (page.seleccion ? '\nTEXTO SELECCIONADO POR EL USUARIO:\n' + page.seleccion : '') +
@@ -878,6 +878,7 @@ sf.onsubmit = (e) => {
   store.saveSettings(settings);
   applyTheme();
   host.setHostSettings(settings).catch(() => {});
+  warmup(settings);
   const st = $('#saveStatus');
   st.textContent = 'Guardado';
   st.className = 'status ok';
@@ -933,4 +934,5 @@ setMode('chat');
 renderThread();
 refreshContext();
 host.setHostSettings(settings).catch(() => {});
+warmup(settings);
 if (location.hash === '#ajustes') showView('settings');

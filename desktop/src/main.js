@@ -212,6 +212,36 @@ function createWindow() {
   win.on('closed', () => { win = null; });
   win.webContents.on('will-navigate', (e, url) => { if (!url.startsWith('navega://')) e.preventDefault(); });
   win.webContents.setWindowOpenHandler(({ url }) => { sendToUI('open-tab', { url }); return { action: 'deny' }; });
+  // Menú contextual del asistente y de la barra de direcciones (copiar, pegar…)
+  win.webContents.on('context-menu', (e, p) => {
+    const t = [];
+    if (p.linkURL && /^(https?|mailto):/.test(p.linkURL)) {
+      t.push({ label: 'Abrir enlace en pestaña nueva', click: () => sendToUI('open-tab', { url: p.linkURL }) });
+      t.push({ label: 'Copiar dirección del enlace', click: () => clipboard.writeText(p.linkURL) });
+      t.push({ type: 'separator' });
+    }
+    if (p.isEditable) {
+      t.push({ label: 'Deshacer', role: 'undo', enabled: p.editFlags.canUndo },
+        { label: 'Rehacer', role: 'redo', enabled: p.editFlags.canRedo }, { type: 'separator' },
+        { label: 'Cortar', role: 'cut', enabled: p.editFlags.canCut },
+        { label: 'Copiar', role: 'copy', enabled: p.editFlags.canCopy },
+        { label: 'Pegar', role: 'paste', enabled: p.editFlags.canPaste },
+        { label: 'Seleccionar todo', role: 'selectAll' });
+      if (p.misspelledWord && p.dictionarySuggestions.length) {
+        t.unshift({ type: 'separator' });
+        p.dictionarySuggestions.slice(0, 4).reverse().forEach((s) => t.unshift({ label: s, click: () => win.webContents.replaceMisspelling(s) }));
+      }
+    } else {
+      t.push({ label: 'Copiar', role: 'copy', enabled: !!p.selectionText });
+      t.push({ label: 'Seleccionar todo', role: 'selectAll' });
+      if (p.selectionText) {
+        const sel = p.selectionText.trim();
+        t.push({ type: 'separator' });
+        t.push({ label: 'Buscar en la web con IA', click: () => sendToUI('ai', { kind: 'ask', mode: 'buscar', text: sel.slice(0, 300) }) });
+      }
+    }
+    if (t.length) Menu.buildFromTemplate(t).popup({ window: win });
+  });
 }
 
 function sendToUI(channel, data) {

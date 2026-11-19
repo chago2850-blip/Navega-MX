@@ -79,8 +79,8 @@ export function answer(o) {
     o.onStatus && o.onStatus('Leyendo ' + results.length + ' fuentes…');
     const texts = await Promise.all(results.map(async (r) => {
       try {
-        const res = await withTimeout(host.fetch(r.url, { method: 'GET', headers: { 'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9' } }), 9000);
-        return pageText(res.text, 2800);
+        const res = await withTimeout(host.fetch(r.url, { method: 'GET', headers: { 'User-Agent': UA, 'Accept-Language': 'es-MX,es;q=0.9' } }), 6000);
+        return pageText(res.text, 1600);
       } catch (e) { return ''; }
     }));
     if (aborted) return { text: '', sources: results };

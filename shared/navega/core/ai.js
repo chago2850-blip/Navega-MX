@@ -109,7 +109,7 @@ export function chat({ settings: s, messages, onToken, onStatus, json = false })
     if (s.provider === 'ollama') {
       const model = await resolveOllamaModel(s);
       url = trimSlash(s.ollamaUrl) + '/api/chat';
-      body = { model, messages, stream: true, options: { temperature: Number(s.temperature) || 0.4, num_ctx: 16384 } };
+      body = { model, messages, stream: true, keep_alive: '30m', options: { temperature: Number(s.temperature) || 0.4, num_ctx: 8192 } };
       if (json) body.format = 'json';
     } else {
       url = trimSlash(s.openaiUrl) + '/chat/completions';
@@ -177,6 +177,23 @@ function connectionHelp(s, msg) {
   if (s.provider === 'ollama')
     return 'No pude conectar con Ollama en ' + s.ollamaUrl + '. Instálalo desde ollama.com, ejecútalo y descarga un modelo (ollama pull qwen2.5:7b). Detalle: ' + msg;
   return 'No pude conectar con el servidor de IA en ' + s.openaiUrl + '. Detalle: ' + msg;
+}
+
+/**
+ * Precarga el modelo en memoria (Ollama) para que la primera respuesta empiece
+ * sin esperar a que el modelo se cargue desde el disco.
+ */
+export async function warmup(s) {
+  if (s.provider !== 'ollama') return;
+  try {
+    const model = await resolveOllamaModel(s);
+    await host.fetch(trimSlash(s.ollamaUrl) + '/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model, keep_alive: '30m', options: { num_ctx: 8192 } }),
+      timeout: 120000,
+    });
+  } catch (e) { /* Ollama no disponible: se avisará al preguntar */ }
 }
 
 /** Pide una respuesta completa (sin streaming visible). */
