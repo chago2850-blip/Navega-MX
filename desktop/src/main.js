@@ -65,7 +65,13 @@ function resolveNavegaPath(urlStr) {
   const u = new URL(urlStr);
   let p = decodeURIComponent(u.pathname);
   // navega://inicio  -> página de nueva pestaña
-  if (u.host === 'inicio') return path.join(SHARED_DIR, 'navega', 'ui', 'inicio.html');
+  if (u.host === 'inicio') {
+    if (p === '/' || p === '' || p === '/index.html') return path.join(SHARED_DIR, 'navega', 'ui', 'inicio.html');
+    // recursos relativos de la página de inicio, p. ej. ../img/logo.svg -> /img/logo.svg
+    const base = path.join(SHARED_DIR, 'navega');
+    const f = path.normalize(path.join(base, p));
+    return f.startsWith(base) ? f : null;
+  }
   if (u.host !== 'app') return null;
   if (p === '/' || p === '') p = '/index.html';
   let base = APP_DIR;
