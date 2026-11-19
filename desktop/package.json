@@ -1,7 +1,7 @@
 {
   "name": "navega-mx",
   "productName": "Navega-MX",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Navegador web con IA de código abierto: asistente, motor de respuestas con fuentes y agente que navega por ti.",
   "main": "src/main.js",
   "desktopName": "navega-mx.desktop",

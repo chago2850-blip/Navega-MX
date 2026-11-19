@@ -539,11 +539,16 @@ if (process.env.NAVEGA_SMOKE) {
         out.agente = String(snap).split('\\n').slice(0, 5);
         const wv = document.querySelector('webview.vis');
         out.puenteInicio = await wv.executeJavaScript('typeof window.navegaNewtab');
+        await wv.executeJavaScript("window.__probar = function (m, t) { document.querySelector('#seg button[data-m=' + m + ']').click(); document.getElementById('q').value = t; document.querySelector('.go').click(); }");
+        const definir = "window.__probar = function (m, t) { document.querySelector('#seg button[data-m=' + m + ']').click(); document.getElementById('q').value = t; document.querySelector('.go').click(); }";
         const probar = async (modo, texto) => {
-          await wv.executeJavaScript('(function(){var b=document.querySelector(\'#seg button[data-m="' + modo + '"]\');b.click();var q=document.getElementById("q");q.value=' + JSON.stringify(texto) + ';document.querySelector(".go").click();})()');
+          await wv.executeJavaScript(definir);
+          await wv.executeJavaScript('window.__probar(' + JSON.stringify(modo) + ',' + JSON.stringify(texto) + ')');
           await new Promise((r) => setTimeout(r, 3000));
           const msgs = Array.from(f.document.querySelectorAll('.msg.user .bubble')).map((b) => b.textContent);
-          return msgs.some((m) => m.includes(texto));
+          const ok = msgs.some((m) => m.includes(texto));
+          for (let i = 0; i < 60 && f.document.getElementById('btnSend').dataset.tip === 'Detener'; i++) await new Promise((r) => setTimeout(r, 1000));
+          return ok;
         };
         out.botonPreguntarIA = await probar('preguntar', '¿Qué es el software libre?');
         out.botonAgente = await probar('agente', 'Abre la Wikipedia en español');
