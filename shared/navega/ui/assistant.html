@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<!--
+  Navega-MX — Asistente de IA
+  Copyright (C) 2026 Santiago Miguel
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Navega — Asistente</title>
+  <link rel="stylesheet" href="assistant.css">
+  <script type="module" src="assistant.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="../img/logo.svg" alt="" width="26" height="26">
+      <span>Navega</span>
+    </div>
+    <div class="top-actions">
+      <button class="icon" id="btnNew" data-tip="Nueva conversación"><svg><use href="#i-plus"/></svg></button>
+      <button class="icon" id="btnThreads" data-tip="Conversaciones anteriores"><svg><use href="#i-clock"/></svg></button>
+      <button class="icon desktop-only" id="btnExpand" data-tip="Pantalla completa"><svg><use href="#i-expand"/></svg></button>
+      <button class="icon" id="btnClose" data-tip="Cerrar asistente"><svg><use href="#i-x"/></svg></button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="chat" data-tip="Chat, búsqueda y agente"><svg><use href="#i-spark"/></svg><span>Asistente</span></button>
+    <button class="tab" data-view="tasks" data-tip="Tareas en segundo plano y programadas"><svg><use href="#i-tasks"/></svg><span>Tareas</span><b class="badge" id="taskBadge" hidden>0</b></button>
+    <button class="tab" data-view="shortcuts" data-tip="Atajos con /"><svg><use href="#i-slash"/></svg><span>Atajos</span></button>
+    <button class="tab" data-view="memory" data-tip="Memoria y privacidad"><svg><use href="#i-brain"/></svg><span>Memoria</span></button>
+    <button class="tab" data-view="settings" data-tip="Ajustes de IA y navegador"><svg><use href="#i-gear"/></svg><span>Ajustes</span></button>
+  </nav>
+
+  <!-- ===================== ASISTENTE ===================== -->
+  <section class="view active" id="view-chat">
+    <div class="messages" id="messages">
+      <div class="empty" id="empty">
+        <img src="../img/logo.svg" alt="" width="64" height="64">
+        <h1>¿En qué te ayudo?</h1>
+        <p>Pregunta sobre la página, busca en la web con fuentes o deja que el agente haga la tarea por ti. Todo con IA de código abierto.</p>
+        <div class="chips" id="suggestions">
+          <button class="chip" data-prompt="/resumir">Resume esta página</button>
+          <button class="chip" data-prompt="/puntos">Puntos clave</button>
+          <button class="chip" data-prompt="/pestanas">Sintetiza mis pestañas</button>
+          <button class="chip" data-mode="buscar" data-prompt="">Busca en la web…</button>
+          <button class="chip" data-mode="agente" data-prompt="">Haz una tarea por mí…</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <div class="context" id="contextBar">
+        <button class="ctx-chip on" id="ctxPage" data-tip="Incluir la página actual como contexto">
+          <svg><use href="#i-page"/></svg><span id="ctxPageTitle">Página actual</span>
+        </button>
+        <span id="ctxTabs"></span>
+        <button class="ctx-add" id="ctxAdd" data-tip="Agregar otra pestaña al contexto (@)"><svg><use href="#i-at"/></svg></button>
+      </div>
+      <div class="input-wrap">
+        <div class="popup" id="popup" hidden></div>
+        <textarea id="input" rows="1" placeholder="Pregunta lo que quieras… ( / atajos · @ pestañas )"></textarea>
+      </div>
+      <div class="composer-row">
+        <div class="seg" id="modeSeg">
+          <button class="on" data-mode="chat" data-tip="Conversa sobre la página y tus pestañas">Preguntar</button>
+          <button data-mode="buscar" data-tip="Busca en la web y responde con fuentes citadas">Buscar</button>
+          <button data-mode="agente" data-tip="El agente toma el control del navegador y hace la tarea">Agente</button>
+        </div>
+        <label class="bg-toggle" id="bgToggle" hidden data-tip="Ejecutar el agente en una pestaña en segundo plano">
+          <input type="checkbox" id="bgCheck"> 2º plano
+        </label>
+        <span class="grow"></span>
+        <button class="icon" id="btnMic" data-tip="Dictar por voz (Alt+Shift+V)"><svg><use href="#i-mic"/></svg></button>
+        <button class="send" id="btnSend" data-tip="Enviar (Enter)"><svg><use href="#i-send"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== TAREAS ===================== -->
+  <section class="view" id="view-tasks">
+    <div class="pane">
+      <h2>Tareas en curso</h2>
+      <p class="hint">El agente puede trabajar en segundo plano mientras sigues navegando.</p>
+      <div id="runningList" class="list"></div>
+
+      <h2>Tareas programadas</h2>
+      <p class="hint">Se ejecutan automáticamente mientras Navega-MX está abierto. El resultado aparece en tus conversaciones.</p>
+      <div id="schedList" class="list"></div>
+      <form class="card form" id="schedForm">
+        <label>Instrucción<textarea name="prompt" rows="2" required placeholder="Ej. Revisa las noticias de tecnología en México y hazme un resumen"></textarea></label>
+        <div class="row">
+          <label>Hora<input type="time" name="time" value="08:00" required></label>
+          <label>Modo<select name="mode"><option value="buscar">Buscar y resumir</option><option value="agente">Agente</option></select></label>
+        </div>
+        <div class="days" id="schedDays"></div>
+        <button class="btn primary" type="submit">Agregar tarea programada</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== ATAJOS ===================== -->
+  <section class="view" id="view-shortcuts">
+    <div class="pane">
+      <h2>Tus atajos</h2>
+      <p class="hint">Escribe <code>/</code> en el chat para usarlos. Variables: <code>{texto}</code> lo que escribas después, <code>{pagina}</code> título y dirección, <code>{url}</code>, <code>{seleccion}</code>.</p>
+      <div id="customShortcuts" class="list"></div>
+      <form class="card form" id="scForm">
+        <div class="row">
+          <label>Nombre<input name="name" required pattern="[a-z0-9\-]+" placeholder="ej. precios"></label>
+          <label>Modo<select name="mode"><option value="chat">Preguntar</option><option value="buscar">Buscar</option><option value="agente">Agente</option></select></label>
+        </div>
+        <label>Descripción<input name="desc" placeholder="Para qué sirve"></label>
+        <label>Instrucción<textarea name="prompt" rows="3" required placeholder="Ej. Busca este producto en 3 tiendas mexicanas y compara precios: {texto}"></textarea></label>
+        <label class="check"><input type="checkbox" name="allTabs"> Usar todas las pestañas como contexto</label>
+        <input type="hidden" name="editing">
+        <button class="btn primary" type="submit">Guardar atajo</button>
+      </form>
+      <h2>Atajos incluidos</h2>
+      <div id="builtinShortcuts" class="list"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MEMORIA ===================== -->
+  <section class="view" id="view-memory">
+    <div class="pane">
+      <h2>Privacidad de la memoria</h2>
+      <div class="card">
+        <label class="radio"><input type="radio" name="memMode" value="off"> <b>Sin memoria</b><small>No se guarda nada sobre ti ni tus conversaciones.</small></label>
+        <label class="radio"><input type="radio" name="memMode" value="local"> <b>Memoria local</b><small>Recuerda datos que tú guardes y tus conversaciones, solo en este equipo.</small></label>
+        <label class="radio"><input type="radio" name="memMode" value="local+historial"> <b>Memoria local + historial</b><small>Además usa los títulos de tu historial reciente como contexto.</small></label>
+      </div>
+      <h2>Lo que Navega recuerda</h2>
+      <form class="inline-form" id="memForm"><input name="fact" placeholder="Agrega un dato, ej. Prefiero vuelos desde Acapulco"><button class="btn">Guardar</button></form>
+      <div id="memList" class="list"></div>
+      <h2>Conversaciones guardadas</h2>
+      <div id="threadList" class="list"></div>
+      <div class="row wrap">
+        <button class="btn" id="btnExport">Exportar datos</button>
+        <button class="btn" id="btnImport">Importar</button>
+        <button class="btn danger" id="btnClearThreads">Borrar conversaciones</button>
+        <button class="btn danger" id="btnClearMemory">Borrar memoria</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== AJUSTES ===================== -->
+  <section class="view" id="view-settings">
+    <form class="pane" id="settingsForm">
+      <h2>Inteligencia artificial</h2>
+      <div class="card form">
+        <label>Motor de IA (todos de código abierto)
+          <select name="provider">
+            <option value="ollama">Ollama — modelos abiertos locales (recomendado)</option>
+            <option value="openai">Servidor compatible (llama.cpp, LM Studio, LocalAI, vLLM, Jan…)</option>
+            <option value="webllm" class="desktop-only">IA integrada con WebGPU (sin instalar nada)</option>
+          </select>
+        </label>
+        <div data-prov="ollama">
+          <label>Dirección de Ollama<input name="ollamaUrl" placeholder="http://localhost:11434"></label>
+          <label>Modelo<input name="ollamaModel" list="modelList" placeholder="automático (ej. qwen2.5:7b, llama3.2, gemma3)"></label>
+          <p class="hint">Instala Ollama desde <a href="https://ollama.com" data-ext="1">ollama.com</a> y ejecuta <code>ollama pull qwen2.5:7b</code>. En Android escribe la IP de tu computadora, p. ej. <code>http://192.168.1.10:11434</code>, e inicia Ollama con <code>OLLAMA_HOST=0.0.0.0</code>.</p>
+        </div>
+        <div data-prov="openai">
+          <label>URL base (/v1)<input name="openaiUrl" placeholder="http://localhost:8080/v1"></label>
+          <label>Modelo<input name="openaiModel" list="modelList" placeholder="nombre del modelo"></label>
+          <label>Clave (opcional)<input name="openaiKey" type="password" autocomplete="off"></label>
+        </div>
+        <div data-prov="webllm">
+          <label>Modelo integrado<select name="webllmModel" id="webllmSelect"></select></label>
+          <p class="hint">Se descarga una sola vez y corre 100% en tu equipo con la tarjeta gráfica.</p>
+        </div>
+        <datalist id="modelList"></datalist>
+        <div class="row">
+          <button type="button" class="btn" id="btnTest">Probar conexión</button>
+          <span class="status" id="testStatus"></span>
+        </div>
+        <label>Creatividad <output id="tempOut"></output><input type="range" name="temperature" min="0" max="1.2" step="0.1"></label>
+        <label>Idioma de las respuestas<input name="language"></label>
+      </div>
+
+      <h2>Búsqueda</h2>
+      <div class="card form">
+        <label>Buscador
+          <select name="searchEngine">
+            <option value="duckduckgo">DuckDuckGo</option>
+            <option value="searxng">SearXNG (código abierto, tu instancia)</option>
+            <option value="brave">Brave Search</option>
+            <option value="startpage">Startpage</option>
+            <option value="google">Google</option>
+            <option value="bing">Bing</option>
+          </select>
+        </label>
+        <label>URL de SearXNG<input name="searxUrl" placeholder="https://searx.ejemplo.org"></label>
+        <label>Fuentes por respuesta<input type="number" name="answerSources" min="3" max="10"></label>
+      </div>
+
+      <h2>Navegación y agente</h2>
+      <div class="card form">
+        <label class="check"><input type="checkbox" name="adblock"> Bloquear anuncios y rastreadores</label>
+        <label class="check"><input type="checkbox" name="agentConfirm"> Pedir confirmación antes de pagos, envíos, borrados y contraseñas</label>
+        <label>Pasos máximos del agente<input type="number" name="agentMaxSteps" min="5" max="80"></label>
+        <label>Página de inicio<input name="homepage" placeholder="navega://inicio"></label>
+        <label>Tema
+          <select name="theme"><option value="auto">Automático</option><option value="claro">Claro</option><option value="oscuro">Oscuro</option></select>
+        </label>
+      </div>
+
+      <h2>Voz</h2>
+      <div class="card form">
+        <label class="desktop-only">Servidor de transcripción Whisper (/v1)<input name="sttUrl" placeholder="http://localhost:8000/v1"></label>
+        <label class="desktop-only">Modelo de transcripción<input name="sttModel" placeholder="whisper-1"></label>
+        <label class="check"><input type="checkbox" name="tts"> Leer en voz alta las respuestas</label>
+      </div>
+
+      <div class="savebar"><button class="btn primary" type="submit">Guardar ajustes</button><span class="status" id="saveStatus"></span></div>
+
+      <h2>Acerca de</h2>
+      <div class="card about">
+        <img src="../img/logo.svg" alt="" width="56" height="56">
+        <div>
+          <b>Navega-MX</b> <span id="version"></span><br>
+          Navegador con IA de código abierto.<br>
+          Licencia <a href="https://www.gnu.org/licenses/gpl-3.0.html" data-ext="1">GNU GPL v3 o posterior</a>.<br>
+          Desarrollador: Santiago Miguel · <a href="mailto:chago2850@gmail.com" data-ext="1">chago2850@gmail.com</a> · 744 354 8848<br>
+          <a href="https://github.com/chago2850-blip/Navega-MX" data-ext="1">github.com/chago2850-blip/Navega-MX</a>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <div class="drawer" id="threadsDrawer" hidden>
+    <div class="drawer-head"><b>Conversaciones</b><button class="icon" id="closeDrawer" data-tip="Cerrar"><svg><use href="#i-x"/></svg></button></div>
+    <div class="list" id="drawerList"></div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+  <div class="tooltip" id="tooltip" hidden></div>
+  <input type="file" id="importFile" accept="application/json" hidden>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3c.7 4.3 1.7 5.3 6 6-4.3.7-5.3 1.7-6 6-.7-4.3-1.7-5.3-6-6 4.3-.7 5.3-1.7 6-6zM19 15c.3 1.7.8 2.2 2.5 2.5-1.7.3-2.2.8-2.5 2.5-.3-1.7-.8-2.2-2.5-2.5 1.7-.3 2.2-.8 2.5-2.5z"/></symbol>
+      <symbol id="i-tasks" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></symbol>
+      <symbol id="i-slash" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M14.5 7l-5 10"/></symbol>
+      <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a3 3 0 0 0-3-1zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.8 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7.3 19.6l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3.3 14H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.4 7.3l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3.3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.8 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 20.7 10H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-page" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+      <symbol id="i-at" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></symbol>
+      <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+      <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7z"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></symbol>
+      <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 17v5M8 3h8l-1 6 3 3v2H6v-2l3-3z"/></symbol>
+      <symbol id="i-retry" viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6"/><path d="M20 10a8 8 0 0 0-14-3L4 10M4 14a8 8 0 0 0 14 3l2-3"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+      <symbol id="i-robot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3l10 18H2zM12 10v4M12 17h.01"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4"/></symbol>
+      <symbol id="i-tab" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18"/></symbol>
+    </defs>
+  </svg>
+</body>
+</html>

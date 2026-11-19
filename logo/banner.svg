@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1400 360" width="1400" height="360">
+  <defs>
+    <linearGradient id="tb" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#14E0C8"/><stop offset="0.5" stop-color="#5B8CFF"/><stop offset="1" stop-color="#FF2E88"/>
+    </linearGradient>
+    <linearGradient id="bgb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1538"/><stop offset="1" stop-color="#2A1660"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="360" rx="48" fill="url(#bgb)"/>
+  <image href="navega-mx.svg" x="50" y="40" width="280" height="280"/>
+  <text x="370" y="190" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="128" font-weight="800" fill="#FFFFFF" letter-spacing="-2">Navega<tspan fill="url(#tb)">-MX</tspan></text>
+  <text x="376" y="262" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif" font-size="40" font-weight="500" fill="#B9C8FF">Navegador con IA de código abierto · GPL-3.0</text>
+</svg>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<!-- Navega-MX — Página de inicio · GPL-3.0-or-later · (C) 2026 Santiago Miguel -->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nueva pestaña</title>
+<link rel="icon" href="../img/logo.svg">
+<style>
+  :root { --bg:#0B1030; --text:#EEF1FF; --muted:#9AA6D6; --panel:rgba(255,255,255,.06); --border:rgba(160,175,255,.18);
+          --grad:linear-gradient(135deg,#14E0C8 0%,#5B8CFF 50%,#FF2E88 100%); color-scheme: dark; }
+  :root[data-theme="claro"] { --bg:#F4F6FD; --text:#141A3A; --muted:#5D6894; --panel:#fff; --border:rgba(30,40,100,.14); color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { font: 15px/1.5 Inter, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; color: var(--text);
+         background: radial-gradient(1200px 600px at 50% -10%, rgba(91,140,255,.28), transparent 60%),
+                     radial-gradient(800px 500px at 100% 100%, rgba(255,46,136,.16), transparent 60%), var(--bg);
+         min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+  main { width: min(720px, 92vw); margin-top: 12vh; text-align: center; }
+  .logo { width: 92px; height: 92px; filter: drop-shadow(0 10px 30px rgba(91,140,255,.45)); }
+  h1 { font-size: clamp(28px, 5vw, 40px); margin: 14px 0 4px; letter-spacing: -1px; }
+  h1 span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); margin: 0 0 26px; }
+  form { position: relative; background: var(--panel); border: 1px solid var(--border); border-radius: 22px; padding: 8px;
+         box-shadow: 0 18px 50px rgba(0,0,0,.25); backdrop-filter: blur(10px); }
+  textarea { width: 100%; border: 0; outline: none; resize: none; background: none; color: var(--text); font: inherit; font-size: 17px; padding: 12px 14px 6px; min-height: 52px; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 4px 6px; }
+  .seg { display: inline-flex; gap: 2px; background: rgba(127,140,200,.12); border-radius: 12px; padding: 3px; }
+  .seg button { border: 0; background: none; color: var(--muted); padding: 6px 12px; border-radius: 9px; font: inherit; font-size: 13px; cursor: pointer; }
+  .seg button.on { background: var(--grad); color: #fff; font-weight: 600; }
+  .go { margin-left: auto; width: 42px; height: 42px; border: 0; border-radius: 13px; background: var(--grad); color: #fff; cursor: pointer; display: grid; place-items: center; }
+  .go svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 12px; margin: 34px 0 10px; }
+  .tile { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px; border-radius: 16px; text-decoration: none; color: var(--text);
+          background: var(--panel); border: 1px solid var(--border); font-size: 12.5px; transition: transform .15s, border-color .15s; overflow: hidden; }
+  .tile:hover { transform: translateY(-2px); border-color: #5B8CFF; }
+  .tile .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-weight: 700; font-size: 18px; color: #fff; }
+  .tile .nm { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tips { color: var(--muted); font-size: 13px; margin-top: 18px; }
+  kbd { font-family: inherit; font-size: 12px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--border); }
+  footer { margin-top: auto; padding: 24px; color: var(--muted); font-size: 12px; }
+  footer a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="../img/logo.svg" alt="Navega-MX">
+  <h1><span id="greet">Hola</span>, ¿qué exploramos hoy?</h1>
+  <p class="sub">Busca, pregunta a la IA o pide que el agente lo haga por ti.</p>
+  <form id="f">
+    <textarea id="q" rows="1" placeholder="Escribe una dirección, una búsqueda o una pregunta…" autofocus></textarea>
+    <div class="bar">
+      <div class="seg" id="seg">
+        <button type="button" data-m="preguntar" class="on" title="Respuesta de la IA con fuentes de la web">Preguntar IA</button>
+        <button type="button" data-m="web" title="Búsqueda clásica en tu buscador">Buscar web</button>
+        <button type="button" data-m="agente" title="El agente toma el control y hace la tarea">Agente</button>
+      </div>
+      <button class="go" title="Ir"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+  </form>
+  <div class="tiles" id="tiles"></div>
+  <div class="tips">Consejos: <kbd>Alt</kbd>+<kbd>A</kbd> abre el asistente · escribe <kbd>/</kbd> en el asistente para atajos · <kbd>?</kbd> al inicio de la barra de direcciones pregunta a la IA</div>
+</main>
+<footer>Navega-MX · software libre bajo <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL-3.0</a></footer>
+<script>
+(function () {
+  var settings = {};
+  try { settings = JSON.parse(localStorage.getItem('navega.settings') || '{}'); } catch (e) {}
+  var theme = settings.theme === 'claro' || settings.theme === 'oscuro' ? settings.theme
+    : (matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'oscuro');
+  document.documentElement.dataset.theme = theme;
+  var h = new Date().getHours();
+  document.getElementById('greet').textContent = h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
+
+  var mode = 'preguntar';
+  var seg = document.querySelectorAll('#seg button');
+  seg.forEach(function (b) { b.onclick = function () { mode = b.dataset.m; seg.forEach(function (x) { x.classList.toggle('on', x === b); }); q.focus(); }; });
+
+  function searchUrl(t) {
+    var e = encodeURIComponent(t);
+    switch (settings.searchEngine) {
+      case 'google': return 'https://www.google.com/search?q=' + e;
+      case 'bing': return 'https://www.bing.com/search?q=' + e;
+      case 'brave': return 'https://search.brave.com/search?q=' + e;
+      case 'startpage': return 'https://www.startpage.com/do/search?q=' + e;
+      case 'searxng': if (settings.searxUrl) return settings.searxUrl.replace(/\/+$/, '') + '/search?q=' + e;
+      default: return 'https://duckduckgo.com/?kl=mx-es&q=' + e;
+    }
+  }
+  function isUrl(t) { return /^(https?:\/\/|www\.)\S+$/i.test(t) || /^[\w-]+(\.[\w-]+)+(:\d+)?(\/\S*)?$/.test(t); }
+  function ask(text, m) {
+    if (window.navegaNewtab) window.navegaNewtab.ask(text, m);
+    else location.href = 'navega-ask:?m=' + encodeURIComponent(m) + '&q=' + encodeURIComponent(text);
+  }
+  var q = document.getElementById('q');
+  q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
+  q.addEventListener('input', function () { q.style.height = 'auto'; q.style.height = Math.min(200, q.scrollHeight) + 'px'; });
+  document.getElementById('f').onsubmit = function (e) { e.preventDefault(); go(); };
+  function go() {
+    var t = q.value.trim();
+    if (!t) return;
+    if (isUrl(t)) { location.href = /^https?:/i.test(t) ? t : 'https://' + t; return; }
+    if (mode === 'web') { location.href = searchUrl(t); return; }
+    ask(t, mode === 'agente' ? 'agente' : 'buscar');
+  }
+
+  var COLORS = ['#5B8CFF', '#FF2E88', '#14E0C8', '#FF8A3D', '#8B5CF6', '#22C55E', '#EAB308', '#06B6D4'];
+  var defaults = [
+    { title: 'Wikipedia', url: 'https://es.wikipedia.org' },
+    { title: 'YouTube', url: 'https://www.youtube.com' },
+    { title: 'GitHub', url: 'https://github.com' },
+    { title: 'Mercado Libre', url: 'https://www.mercadolibre.com.mx' },
+    { title: 'Gmail', url: 'https://mail.google.com' },
+    { title: 'OpenStreetMap', url: 'https://www.openstreetmap.org' },
+    { title: 'Ollama', url: 'https://ollama.com' },
+    { title: 'Hugging Face', url: 'https://huggingface.co' },
+  ];
+  window.navegaSetTiles = function (list) {
+    var el = document.getElementById('tiles');
+    el.innerHTML = '';
+    (list && list.length ? list : defaults).slice(0, 12).forEach(function (b, i) {
+      var a = document.createElement('a');
+      a.className = 'tile';
+      a.href = b.url;
+      var host = '';
+      try { host = new URL(b.url).hostname.replace(/^www\./, ''); } catch (e) {}
+      var ic = document.createElement('span');
+      ic.className = 'ic';
+      ic.style.background = COLORS[i % COLORS.length];
+      ic.textContent = (b.title || host || '?').trim().charAt(0).toUpperCase();
+      var nm = document.createElement('span');
+      nm.className = 'nm';
+      nm.textContent = b.title || host;
+      a.title = b.url;
+      a.appendChild(ic); a.appendChild(nm);
+      el.appendChild(a);
+    });
+  };
+  var bm = [];
+  try { bm = JSON.parse(localStorage.getItem('navega.bookmarks') || '[]'); } catch (e) {}
+  window.navegaSetTiles(bm);
+})();
+</script>
+</body>
+</html>

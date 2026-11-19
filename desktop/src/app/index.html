@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  Navega-MX — interfaz del navegador
+  Copyright (C) 2026 Santiago Miguel
+  SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Navega-MX</title>
+  <link rel="stylesheet" href="browser.css">
+  <script src="browser.js" defer></script>
+</head>
+<body>
+  <div id="tabstrip">
+    <button class="ws-btn" id="wsBtn" data-tip="Espacios de trabajo"><span class="ws-dot"></span><span id="wsName">Personal</span><svg><use href="#i-down"/></svg></button>
+    <div id="tabs"></div>
+    <button class="tb-btn" id="newTabBtn" data-tip="Nueva pestaña (Ctrl+T)"><svg><use href="#i-plus"/></svg></button>
+    <div class="drag-space"></div>
+  </div>
+
+  <div id="toolbar">
+    <button class="tb-btn" id="backBtn" data-tip="Atrás (Alt+←)"><svg><use href="#i-left"/></svg></button>
+    <button class="tb-btn" id="fwdBtn" data-tip="Adelante (Alt+→)"><svg><use href="#i-right"/></svg></button>
+    <button class="tb-btn" id="reloadBtn" data-tip="Recargar (Ctrl+R)"><svg><use href="#i-reload"/></svg></button>
+    <button class="tb-btn" id="homeBtn" data-tip="Inicio"><svg><use href="#i-home"/></svg></button>
+    <div id="omni">
+      <span class="omni-icon" id="secIcon" data-tip="Conexión"><svg><use href="#i-search"/></svg></span>
+      <input id="url" spellcheck="false" autocomplete="off" placeholder="Busca, pregunta a la IA o escribe una dirección">
+      <button class="omni-ai" id="omniAsk" data-tip="Preguntar a la IA (Shift+Enter)"><svg><use href="#i-spark"/></svg></button>
+      <div id="suggest" hidden></div>
+    </div>
+    <button class="tb-btn shield" id="shieldBtn" data-tip="Bloqueador de anuncios y rastreadores"><svg><use href="#i-shield"/></svg><b id="shieldCount"></b></button>
+    <button class="tb-btn" id="starBtn" data-tip="Agregar a marcadores (Ctrl+D)"><svg><use href="#i-star"/></svg></button>
+    <button class="tb-btn" id="splitBtn" data-tip="Vista dividida (Ctrl+Shift+S)"><svg><use href="#i-split"/></svg></button>
+    <button class="tb-btn" id="dlBtn" data-tip="Descargas (Ctrl+J)"><svg><use href="#i-download"/></svg><i id="dlDot" hidden></i></button>
+    <button class="ai-btn" id="aiBtn" data-tip="Asistente de IA (Alt+A)"><svg><use href="#i-spark"/></svg><span>Asistente</span></button>
+    <button class="tb-btn" id="menuBtn" data-tip="Menú"><svg><use href="#i-dots"/></svg></button>
+  </div>
+  <div id="progress"></div>
+
+  <div id="main">
+    <div id="content">
+      <div id="splitDivider" hidden></div>
+    </div>
+    <div id="resizer" hidden></div>
+    <aside id="side" hidden>
+      <iframe id="assistant" src="navega://app/shared/navega/ui/assistant.html" allow="microphone; clipboard-write"></iframe>
+    </aside>
+  </div>
+
+  <div id="findbar" hidden>
+    <input id="findInput" placeholder="Buscar en la página">
+    <span id="findCount"></span>
+    <button class="tb-btn" id="findPrev" data-tip="Anterior"><svg><use href="#i-up"/></svg></button>
+    <button class="tb-btn" id="findNext" data-tip="Siguiente"><svg><use href="#i-down"/></svg></button>
+    <button class="tb-btn" id="findClose" data-tip="Cerrar (Esc)"><svg><use href="#i-x"/></svg></button>
+  </div>
+
+  <div id="popover" hidden></div>
+  <div id="modal" hidden><div class="modal-card" id="modalCard"></div></div>
+  <div id="toast" hidden></div>
+  <div id="tooltip" hidden></div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+      <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></symbol>
+      <symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3c.7 4.3 1.7 5.3 6 6-4.3.7-5.3 1.7-6 6-.7-4.3-1.7-5.3-6-6 4.3-.7 5.3-1.7 6-6zM19 15c.3 1.7.8 2.2 2.5 2.5-1.7.3-2.2.8-2.5 2.5-.3-1.7-.8-2.2-2.5-2.5 1.7-.3 2.2-.8 2.5-2.5z"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/></symbol>
+      <symbol id="i-split" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+      <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+      <symbol id="i-mask" viewBox="0 0 24 24"><path d="M3 10c3-1 6-1 9 1 3-2 6-2 9-1-1 5-3 7-5 7-1.6 0-2.6-1.5-4-1.5S9.6 17 8 17c-2 0-4-2-5-7z"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+      <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
+      <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4zM16 9a4 4 0 0 1 0 6"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5"/></symbol>
+    </defs>
+  </svg>
+</body>
+</html>

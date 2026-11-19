@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#0D1230</color>
+    <color name="chrome">#11173A</color>
+    <color name="field">#1B2455</color>
+    <color name="text">#EEF1FF</color>
+    <color name="muted">#9AA6D6</color>
+    <color name="accent">#5B8CFF</color>
+    <color name="accent2">#FF2E88</color>
+    <color name="teal">#14E0C8</color>
+</resources>

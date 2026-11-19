@@ -1,0 +1,98 @@
+{
+  "name": "navega-mx",
+  "productName": "Navega-MX",
+  "version": "1.0.0",
+  "description": "Navegador web con IA de código abierto: asistente, motor de respuestas con fuentes y agente que navega por ti.",
+  "main": "src/main.js",
+  "homepage": "https://github.com/chago2850-blip/Navega-MX",
+  "license": "GPL-3.0-or-later",
+  "author": {
+    "name": "Santiago Miguel",
+    "email": "chago2850@gmail.com"
+  },
+  "scripts": {
+    "prepare-vendor": "node scripts/prepare-vendor.js",
+    "start": "npm run prepare-vendor && electron .",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/webview-preload.js && node --check src/app/browser.js",
+    "dist": "npm run prepare-vendor && electron-builder --publish never",
+    "dist:linux": "npm run prepare-vendor && electron-builder --linux deb rpm AppImage --x64 --publish never",
+    "dist:win": "npm run prepare-vendor && electron-builder --win nsis --x64 --publish never",
+    "dist:mac": "npm run prepare-vendor && electron-builder --mac dmg --x64 --arm64 --publish never"
+  },
+  "dependencies": {
+    "@ghostery/adblocker-electron": "^2.20.3"
+  },
+  "devDependencies": {
+    "@mlc-ai/web-llm": "^0.2.89",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "mx.navega.browser",
+    "productName": "Navega-MX",
+    "copyright": "Copyright © 2026 Santiago Miguel — GPL-3.0-or-later",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "../shared", "to": "shared" },
+      { "from": "../LICENSE", "to": "LICENSE" }
+    ],
+    "asar": true,
+    "afterPack": "scripts/after-pack.js",
+    "protocols": [
+      { "name": "Páginas web", "schemes": ["http", "https"] }
+    ],
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.png",
+      "identity": null,
+      "artifactName": "Navega-MX-${version}-macOS-${arch}.${ext}",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Navega-MX usa el micrófono para el modo de voz del asistente.",
+        "NSCameraUsageDescription": "Los sitios web pueden solicitar acceso a la cámara."
+      }
+    },
+    "dmg": {
+      "title": "Navega-MX ${version}"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icon.ico",
+      "artifactName": "Navega-MX-${version}-Windows-${arch}-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Navega-MX",
+      "license": "build/license.txt",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
+    },
+    "linux": {
+      "target": ["deb", "rpm", "AppImage"],
+      "icon": "build/icon.png",
+      "category": "Network",
+      "maintainer": "Santiago Miguel <chago2850@gmail.com>",
+      "vendor": "Santiago Miguel",
+      "synopsis": "Navegador web con IA de código abierto",
+      "mimeTypes": ["x-scheme-handler/http", "x-scheme-handler/https", "text/html"],
+      "artifactName": "Navega-MX-${version}-Linux-${arch}.${ext}"
+    },
+    "deb": {
+      "packageName": "navega-mx"
+    },
+    "rpm": {
+      "packageName": "navega-mx"
+    }
+  }
+}

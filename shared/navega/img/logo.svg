@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Navega-MX · Logo · GPL-3.0-or-later · Santiago Miguel -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1538"/>
+      <stop offset="0.55" stop-color="#1A1E66"/>
+      <stop offset="1" stop-color="#3B1466"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#3E8BFF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3E8BFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#14E0C8"/>
+      <stop offset="0.5" stop-color="#5B8CFF"/>
+      <stop offset="1" stop-color="#FF2E88"/>
+    </linearGradient>
+    <linearGradient id="needleN" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF2E88"/>
+      <stop offset="1" stop-color="#FF8A3D"/>
+    </linearGradient>
+    <linearGradient id="needleS" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#B9C8FF"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFE68A"/>
+      <stop offset="1" stop-color="#FFB21E"/>
+    </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <clipPath id="sq"><rect x="0" y="0" width="1024" height="1024" rx="232"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#sq)">
+    <rect width="1024" height="1024" fill="url(#bg)"/>
+    <circle cx="512" cy="512" r="420" fill="url(#glow)"/>
+    <!-- estrellas de fondo -->
+    <g fill="#FFFFFF">
+      <circle cx="180" cy="760" r="5" opacity="0.55"/>
+      <circle cx="840" cy="790" r="4" opacity="0.5"/>
+      <circle cx="860" cy="200" r="6" opacity="0.6"/>
+      <circle cx="150" cy="420" r="3.5" opacity="0.45"/>
+      <circle cx="640" cy="130" r="3.5" opacity="0.45"/>
+      <circle cx="420" cy="905" r="4" opacity="0.4"/>
+    </g>
+  </g>
+
+  <!-- órbita / brújula -->
+  <circle cx="512" cy="512" r="306" fill="none" stroke="url(#ring)" stroke-width="30"
+          stroke-linecap="round" stroke-dasharray="1650 273" transform="rotate(-20 512 512)"/>
+  <g stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="10" stroke-linecap="round">
+    <line x1="512" y1="238" x2="512" y2="268"/>
+    <line x1="512" y1="756" x2="512" y2="786"/>
+    <line x1="238" y1="512" x2="268" y2="512"/>
+    <line x1="756" y1="512" x2="786" y2="512"/>
+  </g>
+
+  <!-- aguja: halo -->
+  <polygon points="742,282 568,568 456,456" fill="#FF2E88" opacity="0.55" filter="url(#soft)"/>
+  <!-- aguja -->
+  <polygon points="742,282 568,568 456,456" fill="url(#needleN)"/>
+  <polygon points="282,742 456,456 568,568" fill="url(#needleS)"/>
+  <polygon points="742,282 512,512 456,456" fill="#FFFFFF" opacity="0.18"/>
+  <circle cx="512" cy="512" r="40" fill="#0B1538" stroke="#FFFFFF" stroke-width="14"/>
+  <circle cx="512" cy="512" r="12" fill="#14E0C8"/>
+
+  <!-- chispa de IA -->
+  <path d="M300 196 C312 262 326 276 392 288 C326 300 312 314 300 380 C288 314 274 300 208 288 C274 276 288 262 300 196 Z"
+        fill="url(#spark)"/>
+  <path d="M396 150 C401 175 407 181 432 186 C407 191 401 197 396 222 C391 197 385 191 360 186 C385 181 391 175 396 150 Z"
+        fill="#FFFFFF" opacity="0.9"/>
+</svg>

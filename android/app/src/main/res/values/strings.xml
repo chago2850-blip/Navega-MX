@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Navega-MX</string>
+    <string name="url_hint">Busca, pregunta a la IA o escribe una dirección</string>
+    <string name="back">Atrás</string>
+    <string name="forward">Adelante</string>
+    <string name="assistant">Asistente de IA</string>
+    <string name="tabs">Pestañas</string>
+    <string name="menu">Menú</string>
+    <string name="reload">Recargar</string>
+    <string name="shield">Bloqueador de anuncios</string>
+    <string name="home">Inicio</string>
+</resources>
