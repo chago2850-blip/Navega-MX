@@ -48,6 +48,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Prueba de humo (arranca la app real)
+        if: runner.os == 'Linux'
+        timeout-minutes: 4
+        env:
+          NAVEGA_SMOKE: '1'
+        run: xvfb-run -a --server-args="-screen 0 1360x880x24" ./dist/linux-unpacked/navega-mx --no-sandbox
       - uses: actions/upload-artifact@v4
         with:
           name: navega-mx-${{ matrix.nombre }}

@@ -504,3 +504,47 @@ app.on('window-all-closed', () => {
   session.fromPartition(PRIVATE_PARTITION).clearStorageData().catch(() => {});
   if (process.platform !== 'darwin') app.quit();
 });
+
+/* ---------------------------------------------------------------- prueba de humo (CI) */
+if (process.env.NAVEGA_SMOKE) {
+  app.on('web-contents-created', (e, c) => {
+    c.on('console-message', (ev, level, message) => {
+      const msg = (ev && ev.message) || message;
+      const lvl = ev && ev.level != null ? ev.level : level;
+      if (lvl === 'error' || lvl === 3 || /error/i.test(String(msg))) console.log('[consola ' + c.getType() + ']', msg);
+    });
+    c.on('render-process-gone', (ev, d) => console.log('[proceso caído]', d && d.reason));
+  });
+  app.whenReady().then(() => setTimeout(async () => {
+    let ok = true;
+    try {
+      const r = await win.webContents.executeJavaScript(`(async () => {
+        const out = { titulo: document.title, pestanas: document.querySelectorAll('#tabs .tab').length };
+        out.webviews = Array.from(document.querySelectorAll('webview')).map((w) => w.getURL());
+        document.getElementById('aiBtn').click();
+        await new Promise((r) => setTimeout(r, 2500));
+        const f = document.getElementById('assistant').contentWindow;
+        out.asistente = !!(f && f.NavegaUI);
+        const t = await NavegaDesktopHost.getActiveTab();
+        out.activa = t && t.url;
+        const c = await NavegaDesktopHost.getPageContent(t.id, 400);
+        out.contenido = c && (c.title + ' :: ' + String(c.text || c.error).slice(0, 120));
+        const snap = await NavegaDesktopHost.runInTab(t.id, await (await fetch('navega://app/shared/navega/page/agent-dom.js')).text() + ';window.__navega.snapshot({max:5}).elementos');
+        out.agente = String(snap).split('\\n').slice(0, 5);
+        return out;
+      })()`);
+      console.log('[humo] ' + JSON.stringify(r, null, 1));
+      ok = r.pestanas >= 1 && r.asistente && !!r.contenido && !/error/i.test(r.contenido);
+      console.log('[humo] bloqueador cargado: ' + !!blocker);
+      await new Promise((res) => setTimeout(res, 1500));
+      const img = await win.webContents.capturePage();
+      const jpg = img.resize({ width: 900 }).toJPEG(55).toString('base64');
+      console.log('[captura-inicio]' + jpg + '[captura-fin]');
+    } catch (e) {
+      ok = false;
+      console.log('[humo] error: ' + e.stack);
+    }
+    console.log('[humo] resultado: ' + (ok ? 'OK' : 'FALLO'));
+    app.exit(ok ? 0 : 1);
+  }, 12000));
+}
