@@ -201,6 +201,17 @@
   }
 
   function onNavigate(t, url, full) {
+    // Respaldo de la página de inicio: navega://inicio/preguntar?m=…&q=…
+    const ask = /^navega:\/\/inicio\/preguntar\?/.test(url) ? new URL(url) : null;
+    if (ask) {
+      const q = ask.searchParams.get('q') || '';
+      const m = ask.searchParams.get('m') || 'buscar';
+      t.url = HOME;
+      if (t.webview) t.webview.executeJavaScript("history.replaceState(null, '', 'navega://inicio/')").catch(() => {});
+      if (t.id === activeId) setUrlBar(HOME);
+      if (q && Date.now() - (t.lastAsk || 0) > 800) { t.lastAsk = Date.now(); askAI(q, m); }
+      return;
+    }
     t.url = url;
     if (full && t.wcId) { N.adblockReset(t.wcId); if (t.id === activeId) updateShield(0); }
     if (!t.private && /^https?:/.test(url)) {

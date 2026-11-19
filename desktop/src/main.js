@@ -66,7 +66,7 @@ function resolveNavegaPath(urlStr) {
   let p = decodeURIComponent(u.pathname);
   // navega://inicio  -> página de nueva pestaña
   if (u.host === 'inicio') {
-    if (p === '/' || p === '' || p === '/index.html') return path.join(SHARED_DIR, 'navega', 'ui', 'inicio.html');
+    if (p === '/' || p === '' || p === '/index.html' || p === '/preguntar') return path.join(SHARED_DIR, 'navega', 'ui', 'inicio.html');
     // recursos relativos de la página de inicio, p. ej. ../img/logo.svg -> /img/logo.svg
     const base = path.join(SHARED_DIR, 'navega');
     const f = path.normalize(path.join(base, p));
@@ -193,7 +193,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1360, height: 880, minWidth: 720, minHeight: 480,
     title: 'Navega-MX',
-    icon: path.join(__dirname, '..', 'build', 'icon.png'),
+    icon: path.join(__dirname, 'app', 'icon.png'),
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0D1230' : '#F5F6FC',
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
     autoHideMenuBar: true,
@@ -537,10 +537,21 @@ if (process.env.NAVEGA_SMOKE) {
         out.contenido = c && (c.title + ' :: ' + String(c.text || c.error).slice(0, 120));
         const snap = await NavegaDesktopHost.runInTab(t.id, await (await fetch('navega://app/shared/navega/page/agent-dom.js')).text() + ';window.__navega.snapshot({max:5}).elementos');
         out.agente = String(snap).split('\\n').slice(0, 5);
+        const wv = document.querySelector('webview.vis');
+        out.puenteInicio = await wv.executeJavaScript('typeof window.navegaNewtab');
+        const probar = async (modo, texto) => {
+          await wv.executeJavaScript('(function(){var b=document.querySelector(\'#seg button[data-m="' + modo + '"]\');b.click();var q=document.getElementById("q");q.value=' + JSON.stringify(texto) + ';document.querySelector(".go").click();})()');
+          await new Promise((r) => setTimeout(r, 3000));
+          const msgs = Array.from(f.document.querySelectorAll('.msg.user .bubble')).map((b) => b.textContent);
+          return msgs.some((m) => m.includes(texto));
+        };
+        out.botonPreguntarIA = await probar('preguntar', '¿Qué es el software libre?');
+        out.botonAgente = await probar('agente', 'Abre la Wikipedia en español');
+        out.errorVisible = (f.document.querySelector('.err') || {}).textContent || '';
         return out;
       })()`);
       console.log('[humo] ' + JSON.stringify(r, null, 1));
-      ok = r.pestanas >= 1 && r.asistente && !!r.contenido && !/error/i.test(r.contenido);
+      ok = r.pestanas >= 1 && r.asistente && !!r.contenido && !/error/i.test(r.contenido) && r.botonPreguntarIA && r.botonAgente;
       console.log('[humo] bloqueador cargado: ' + !!blocker);
       await new Promise((res) => setTimeout(res, 1500));
       const img = await win.webContents.capturePage();

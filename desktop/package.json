@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "Navegador web con IA de código abierto: asistente, motor de respuestas con fuentes y agente que navega por ti.",
   "main": "src/main.js",
+  "desktopName": "navega-mx.desktop",
   "homepage": "https://github.com/chago2850-blip/Navega-MX",
   "repository": {
     "type": "git",
@@ -104,7 +105,7 @@
         "rpm",
         "AppImage"
       ],
-      "icon": "build/icon.png",
+      "icon": "build/icons",
       "category": "Network",
       "maintainer": "Santiago Miguel <chago2850@gmail.com>",
       "vendor": "Santiago Miguel",
@@ -114,7 +115,9 @@
         "x-scheme-handler/https",
         "text/html"
       ],
-      "artifactName": "Navega-MX-${version}-Linux-${arch}.${ext}"
+      "artifactName": "Navega-MX-${version}-Linux-${arch}.${ext}",
+      "syncDesktopName": true,
+      "executableName": "navega-mx"
     },
     "deb": {
       "packageName": "navega-mx"

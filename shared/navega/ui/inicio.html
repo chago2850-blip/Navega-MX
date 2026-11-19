@@ -89,8 +89,10 @@
   }
   function isUrl(t) { return /^(https?:\/\/|www\.)\S+$/i.test(t) || /^[\w-]+(\.[\w-]+)+(:\d+)?(\/\S*)?$/.test(t); }
   function ask(text, m) {
-    if (window.navegaNewtab) window.navegaNewtab.ask(text, m);
-    else location.href = 'navega-ask:?m=' + encodeURIComponent(m) + '&q=' + encodeURIComponent(text);
+    var qs = '?m=' + encodeURIComponent(m) + '&q=' + encodeURIComponent(text) + '&t=' + Date.now();
+    if (window.navegaNewtab) { try { window.navegaNewtab.ask(text, m); return; } catch (e) { /* usa el respaldo */ } }
+    if (location.protocol === 'navega:') location.replace('navega://inicio/preguntar' + qs);  // escritorio
+    else location.href = 'navega-ask:' + qs;                                                   // Android
   }
   var q = document.getElementById('q');
   q.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); go(); } });
